@@ -154,6 +154,7 @@ namespace ydlidar
           return 0;
         }
         //判断是否需要退出线程（限子线程内调用）
+        //Определить, нужно ли завершить поток (ограничен вызовом внутри подпотоков)
         static void needExit()
         {
 #if defined(_WIN32)

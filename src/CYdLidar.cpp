@@ -453,6 +453,7 @@ void CYdLidar::GetLidarVersion(LidarVersion &version)
 bool CYdLidar::turnOn()
 {
   //重置错误
+  // ошибка сброса
   lidarPtr->setDriverError(NoError);
 
   if (scanning && lidarPtr->isscanning())
@@ -462,6 +463,7 @@ bool CYdLidar::turnOn()
 
   uint32_t t = getms();
   //启动扫描
+  //Начать сканирование
   result_t op_result = lidarPtr->startScan();
   if (!IS_OK(op_result))
   {
@@ -479,6 +481,7 @@ bool CYdLidar::turnOn()
 
   t = getms();
   //计算采样率
+  //Рассчитать частоту дискретизации
   if (!checkLidarAbnormal())
   {
     lidarPtr->stop();
@@ -492,6 +495,8 @@ bool CYdLidar::turnOn()
   fflush(stdout);
 
   //禁用此处获取设备信息方式
+  //Отключите метод получения информации об устройстве здесь
+  
   // if (m_SingleChannel && !isNetTOFLidar(m_LidarType))
   // {
   //   handleSingleChannelDevice();

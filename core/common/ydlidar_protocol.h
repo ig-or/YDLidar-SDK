@@ -153,7 +153,7 @@
 #define PackageSampleMaxLngth 0x100
 #define MaximumNumberOfPackages 765 //= 255 * 3
 
-#define SDK_SNLEN 16 //序列号长度
+#define SDK_SNLEN 16 //序列号长度 // Длина серийного номера
 
 /// Default Node Quality
 #define Node_Default_Quality (10)
@@ -166,8 +166,8 @@
 /// Package Header
 #define PH 0x55AA
 #define PH1 0xAA
-#define PH2 0x55 //AA55是点云数据
-#define PH3 0x66 //AA66是时间戳数据
+#define PH2 0x55 //AA55是点云数据  // Это данные облака точек
+#define PH3 0x66 //AA66是时间戳数据 // это данные временной метки
 
 /// Normal Package size
 #define TrianglePackageDataSize 40
@@ -213,16 +213,16 @@ enum EaiPlatformType
 
 //雷达节点信息
 struct node_info {
-  uint8_t sync; //首包标记
-  uint8_t is; //抗干扰标志
-  uint16_t qual; //信号强度
-  uint16_t angle; //角度值（°）
-  uint16_t dist; //距离值
-  uint64_t stamp; //时间戳
-  uint32_t delayTime; //delay time
-  uint8_t scanFreq; //扫描频率
+  uint8_t sync; //首包标记  // Первая отметка на упаковке  
+  uint8_t is; //抗干扰标志   // Флаг защиты от помех
+  uint16_t qual; //信号强度   //  сила сигнала
+  uint16_t angle; //角度值（°）  // Значение угла (°)
+  uint16_t dist; //距离值    // значение расстояния
+  uint64_t stamp; //时间戳   // Временная метка
+  uint32_t delayTime; //   delay time
+  uint8_t scanFreq; //扫描频率  // частота сканирования
   uint8_t debugInfo; //debug information
-  uint8_t index; //包序号
+  uint8_t index; //包序号 // Серийный номер пакета
   uint8_t error; //error package state
 } __attribute__((packed));
 #define SDKNODESIZE sizeof(node_info)

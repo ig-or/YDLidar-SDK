@@ -420,7 +420,7 @@ class YDlidarDriver : public DriverInterface {
   result_t parseResponseScanData(uint8_t *packageBuffer,
                                  uint32_t timeout = DEFAULT_TIMEOUT);
 
-  //解析时间戳数据（云鲸雷达）
+  //解析时间戳数据（云鲸雷达） // Анализ данных временных меток (Cloud Whale Radar)
   bool parseStampData(uint32_t timeout = DEFAULT_TIMEOUT / 10);
 
   /**
@@ -642,9 +642,9 @@ class YDlidarDriver : public DriverInterface {
   uint32_t m_heartbeat_ts;
   uint8_t m_BlockRevSize;
 
-  uint32_t m_dataPos = 0; //记录当前解析到的数据的位置（解析是否带强度信息专用）
-  uint64_t stamp = 0; //时间戳
-  bool hasStamp = true; //是否有时间戳数据
+  uint32_t m_dataPos = 0; //记录当前解析到的数据的位置（解析是否带强度信息专用） // Запишите местоположение анализируемых в данный момент данных (в зависимости от того, содержит ли анализ информацию об интенсивности).
+  uint64_t stamp = 0; //时间戳 // Временная метка
+  bool hasStamp = true; //是否有时间戳数据 // Есть ли данные о временных метках?
 };
 
 }// namespace ydlidar

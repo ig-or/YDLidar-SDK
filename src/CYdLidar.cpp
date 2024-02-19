@@ -544,6 +544,7 @@ bool CYdLidar::isScanning() const
 bool CYdLidar::doProcessSimple(LaserScan &outscan)
 {
   //判断是否已启动扫描
+  //Определить, запущено ли сканирование
   if (!checkHardware())
   {
     delay(200 / m_ScanFrequency);
@@ -558,10 +559,11 @@ bool CYdLidar::doProcessSimple(LaserScan &outscan)
   uint64_t tim_scan_start = getTime();
   uint64_t startTs = tim_scan_start;
   //从缓存中获取已采集的一圈扫描数据
-  result_t op_result = lidarPtr->grabScanData(global_nodes, count, 500);
+  //Получить собранные данные сканирования круга из кеша
+  result_t op_result = lidarPtr->grabScanData(global_nodes, count, 500); //  here, 'count' is set to the number of nodes (in YDlidarDriver::cacheScanData())
   uint64_t tim_scan_end = getTime();
   uint64_t endTs = tim_scan_end;
-  uint64_t sys_scan_time = tim_scan_end - tim_scan_start; //获取一圈数据所花费的时间
+  uint64_t sys_scan_time = tim_scan_end - tim_scan_start; //Время, необходимое для получения круга данных
   outscan.points.clear();
 
   // Fill in scan data:
@@ -580,6 +582,7 @@ bool CYdLidar::doProcessSimple(LaserScan &outscan)
     }
 
     //根据采样频率计算的采样间隔时间计算出来总的扫描时间
+    //Общее время сканирования рассчитывается на основе интервала выборки, рассчитанного на основе частоты выборки.
     uint64_t scan_time = m_PointTime * (count - 1 + offsetSize);
     int timeDiff = static_cast<int>(sys_scan_time - scan_time);
 
@@ -674,6 +677,7 @@ bool CYdLidar::doProcessSimple(LaserScan &outscan)
     // printf("AngleOffset %f\n", m_AngleOffset);
 
     //遍历一圈点
+    //Пройти круг по точкам
     for (int i = 0; i < count; i++)
     {
       const node_info& node = global_nodes[i];

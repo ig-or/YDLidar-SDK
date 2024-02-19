@@ -40,7 +40,7 @@ YDlidarDriver::YDlidarDriver(uint8_t type) :
 {
 	m_isConnected         = false;
 	m_isScanning          = false;
-	//串口配置参数
+	//串口配置参数  //  Параметры конфигурации последовательного порта
 	m_intensities         = false;
 	isAutoReconnect       = true;
 	isAutoconnting        = false;
@@ -613,6 +613,7 @@ void YDlidarDriver::CheckLaserStatus() {
 }
 
 //解析扫描数据线程主函数
+//Основная функция анализа потока данных сканирования
 int YDlidarDriver::cacheScanData()
 {
 		node_info      local_buf[128];
@@ -633,7 +634,7 @@ int YDlidarDriver::cacheScanData()
 		while (m_isScanning)
 		{
 				count = 128;
-				ans = waitScanData(local_buf, count, DEFAULT_TIMEOUT / 2);
+				ans = waitScanData(local_buf, count, DEFAULT_TIMEOUT / 2);  //   count = how many nodes in local_buf
 
 				Thread::needExit();
 
@@ -684,9 +685,9 @@ int YDlidarDriver::cacheScanData()
 						m_BufferSize = 0;
 				}
 
-				for (size_t pos = 0; pos < count; ++pos)
+				for (size_t pos = 0; pos < count; ++pos)     //   for every node that we have in local_buf
 				{
-						if (local_buf[pos].sync & LIDAR_RESP_SYNCBIT)
+						if (local_buf[pos].sync & LIDAR_RESP_SYNCBIT)   //  we got the very first point? Of the _next_ circle?
 						{
 								// printf("[YDLIDAR] S2 points Stored in buffer start %lu\n", scan_count);
 								if (local_scan[0].sync & LIDAR_RESP_SYNCBIT)
@@ -697,7 +698,7 @@ int YDlidarDriver::cacheScanData()
 										//Используйте время сбора первой точки следующего круга в качестве времени сбора данных текущего круга.
 
 										memcpy(scan_node_buf, local_scan, scan_count * sizeof(node_info));
-										scan_node_count = scan_count;
+										scan_node_count = scan_count;   //  Oh looks like we got the full circle
 										_dataEvent.set();
 										// printf("[YDLIDAR] S2 points Stored in buffer end %lu\n", scan_count);
 								}
@@ -705,9 +706,9 @@ int YDlidarDriver::cacheScanData()
 								scan_count = 0;
 						}
 
-						local_scan[scan_count++] = local_buf[pos];
+						local_scan[scan_count++] = local_buf[pos];     // scan_count points to the _next_ point. Now scan_count == number of the elements already in local_scan
 
-						if (scan_count == _countof(local_scan)) {
+						if (scan_count == _countof(local_scan)) { // we lost the sync somewhere
 								scan_count -= 1;
 						}
 				}

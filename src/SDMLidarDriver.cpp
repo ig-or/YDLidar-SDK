@@ -519,7 +519,7 @@ int SDMLidarDriver::cacheScanData()
             // printf("[YDLIDAR] SDM points Stored in buffer %lu\n", count);
             ScopedLocker l(_lock);
             memcpy(scan_node_buf, local_buf, sizeof(node_info) * SDK_SDM_POINT_COUNT);
-            scan_node_count = SDK_SDM_POINT_COUNT; // 一个包固定1个点
+            scan_node_count = SDK_SDM_POINT_COUNT; // 一个包固定1个点  //  1 балл фиксирован за упаковку
             _dataEvent.set();
             scan_count = 0;
         }
@@ -694,9 +694,9 @@ result_t SDMLidarDriver::grabScanData(
     case Event::EVENT_OK:
     {
         ScopedLocker l(_lock);
-        size_t size_to_copy = min(count, scan_node_count);
+        size_t size_to_copy = min(count, scan_node_count);   // put the real number of points in the full circle 
         memcpy(nodebuffer, scan_node_buf, size_to_copy * SDKNODESIZE);
-        count = size_to_copy;
+        count = size_to_copy;     //    now 'count' is the number of points in  a circle
         scan_node_count = 0;
         return RESULT_OK;
     }

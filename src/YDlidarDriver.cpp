@@ -1567,6 +1567,7 @@ result_t YDlidarDriver::getHealth(device_health &health, uint32_t timeout) {
 	result_t ans;
 
 	if (!m_isConnected) {
+		printf("YDlidarDriver::getHealth()    not connected  \n");
 		return RESULT_FAIL;
 	}
 
@@ -1587,24 +1588,36 @@ result_t YDlidarDriver::getHealth(device_health &health, uint32_t timeout) {
 		ScopedLocker l(_cmd_lock);
 
 		if ((ans = sendCommand(LIDAR_CMD_GET_DEVICE_HEALTH)) != RESULT_OK) {
+			printf("YDlidarDriver::getHealth() sendCommand LIDAR_CMD_GET_DEVICE_HEALTH failed\n");
 			return ans;
 		}
 
 		lidar_ans_header response_header;
 
 		if ((ans = waitResponseHeader(&response_header, timeout)) != RESULT_OK) {
-			return ans;
+			printf("YDlidarDriver::getHealth() waitResponseHeader failed.    trying one more time...\n");
+			if ((ans = sendCommand(LIDAR_CMD_GET_DEVICE_HEALTH)) != RESULT_OK) {
+				printf("YDlidarDriver::getHealth() sendCommand LIDAR_CMD_GET_DEVICE_HEALTH failed\n");
+				return ans;
+			}
+			if ((ans = waitResponseHeader(&response_header, timeout)) != RESULT_OK) {
+				return ans;
+			}
+			//return ans;
 		}
 
 		if (response_header.type != LIDAR_ANS_TYPE_DEVHEALTH) {
+			printf("YDlidarDriver::getHealth() response_header.type = %u \n", response_header.type);
 			return RESULT_FAIL;
 		}
 
 		if (response_header.size < sizeof(device_health)) {
+			printf("YDlidarDriver::getHealth() response_header.size = %u \n", response_header.size);
 			return RESULT_FAIL;
 		}
 
 		if (waitForData(response_header.size, timeout) != RESULT_OK) {
+			printf("YDlidarDriver::getHealth() waitForData failed \n");
 			return RESULT_FAIL;
 		}
 
@@ -1786,6 +1799,7 @@ result_t YDlidarDriver::startScan(bool force, uint32_t timeout)
 
 	if (!m_isConnected)
 	{
+		printf("YDlidarDriver::startScan   not connected  \n");
 		return RESULT_FAIL;
 	}
 
@@ -1804,22 +1818,27 @@ result_t YDlidarDriver::startScan(bool force, uint32_t timeout)
 		//不管单双通雷达都发送启动命令
 		//Независимо от однопроходного или двухпроходного радара, отправьте команду пуска.
 		ret = sendCommand(force ? LIDAR_CMD_FORCE_SCAN : LIDAR_CMD_SCAN);
-		if (!IS_OK(ret))
+		if (!IS_OK(ret))  {
+			printf("YDlidarDriver::startScan  sendCommand failed; force = %s \n", force ? "yes" : "no");
 			return ret;
+		}
 
 		if (!m_SingleChannel)
 		{
 			lidar_ans_header response_header;
 			if ((ret = waitResponseHeader(&response_header, timeout)) != RESULT_OK)
 			{
+				printf("YDlidarDriver::startScan  waitResponseHeader failed  \n");
 				return ret;
 			}
 			if (response_header.type != LIDAR_ANS_TYPE_MEASUREMENT)
 			{
+				printf("YDlidarDriver::startScan   response_header.type = %u \n", response_header.type);
 				return RESULT_FAIL;
 			}
 			if (response_header.size < 5)
 			{
+				printf("YDlidarDriver::startScan   response_header.size = %u \n", response_header.size);
 				return RESULT_FAIL;
 			}
 		}

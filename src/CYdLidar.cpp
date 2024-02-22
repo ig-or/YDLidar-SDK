@@ -466,14 +466,20 @@ bool CYdLidar::turnOn()
   //Начать сканирование
   result_t op_result = lidarPtr->startScan();
   if (!IS_OK(op_result))
-  {
+  { 
+    printf("CYdLidar::turnOn()    trying one more time (1) \n");
     op_result = lidarPtr->startScan();
     if (!IS_OK(op_result))
     {
-      lidarPtr->stop();
-      fprintf(stderr, "[YDLIDAR] Failed to start scan mode: %x\n", op_result);
-      scanning = false;
-      return false;
+        printf("CYdLidar::turnOn()    trying one more time (2) \n");
+        op_result = lidarPtr->startScan();
+        if (!IS_OK(op_result))
+        {
+          lidarPtr->stop();
+          fprintf(stderr, "[YDLIDAR] Failed to start scan mode: %x\n", op_result);
+          scanning = false;
+          return false;
+        }
     }
   }
   printf("[YDLIDAR] Successed to start scan mode, Elapsed time %u ms\n", getms() - t);
@@ -637,7 +643,7 @@ bool CYdLidar::doProcessSimple(LaserScan &outscan)
     memset(&debug, 0, sizeof(debug));
     outscan.config.min_angle = math::from_degrees(m_MinAngle);
     outscan.config.max_angle = math::from_degrees(m_MaxAngle);
-    //将首末点采集时间差作为采集时长
+    //将首末点采集时间差作为采集时长  // Используйте разницу во времени сбора данных между первой и последней точками в качестве продолжительности сбора данных.
     outscan.config.scan_time = static_cast<float>((global_nodes[count - 1].stamp - 
       global_nodes[0].stamp)) / 1e9;
     //outscan.config.scan_time = static_cast<float>(scan_time * 1.0 / 1e9);
@@ -649,11 +655,11 @@ bool CYdLidar::doProcessSimple(LaserScan &outscan)
       outscan.config.time_increment = .0f;
     outscan.config.min_range = m_MinRange;
     outscan.config.max_range = m_MaxRange;
-    //模组编号
+    //模组编号   // Номер модуля
     outscan.moduleNum = global_nodes[0].index;
     //环境标记
     outscan.envFlag = global_nodes[0].is + (uint16_t(global_nodes[1].is) << 8);
-    //将一圈中第一个点采集时间作为该圈数据采集时间
+    //将一圈中第一个点采集时间作为该圈数据采集时间   // Используйте время сбора первой точки круга в качестве времени сбора данных круга.
     if (global_nodes[0].stamp > 0)
       outscan.stamp = global_nodes[0].stamp;
     else
@@ -668,6 +674,9 @@ bool CYdLidar::doProcessSimple(LaserScan &outscan)
 
     outscan.config.angle_increment = math::from_degrees(m_field_of_view) /
       (all_node_count - 1);
+
+    //  printf("doProcessSimple; angle_increment=%f; m_field_of_view = %f; all_node_count = %d; m_FixedResolution=%s;   count = %d\n",
+   //      outscan.config.angle_increment, m_field_of_view, all_node_count, m_FixedResolution?"yes":"no", count);
 
     float range = 0.0;
     float intensity = 0.0;
@@ -795,7 +804,7 @@ bool CYdLidar::doProcessSimple(LaserScan &outscan)
 
     //解析V2协议雷达扫描数据中ct信息中的设备信息
     // getDeviceInfoByPackage(debug);
-    //重新计算采样率
+    //重新计算采样率   // Пересчитать частоту дискретизации
     resample(scanfrequency, count, tim_scan_end, tim_scan_start);
 
     outscan.scanFreq = scanfrequency;
